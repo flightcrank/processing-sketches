@@ -1,7 +1,13 @@
+//screen dimentions
+int w = 256;
+int h = 256;
 
-int w = 640;
-int h = 480;
+//image texture
 PImage tex;
+
+//lookup tables
+int[][] angle = new int[w][h];
+int[][] angle = new int[w][h];
 
 void setup() {
 
