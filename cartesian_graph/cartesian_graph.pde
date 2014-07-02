@@ -1,80 +1,36 @@
 
-float points[][] = new float[8][3];
-int edge[][] = new int[12][2];
+point_3D[] cube_points = new point_3D[8];
+edge[] edges = new edge[12];
 
-float zoom = 400.0; //pixels
+float zoom = 400; //pixels
 float rot_y = 2.0;
 
 void setup() {
   
-  points[0][0] = -1.0;
-  points[0][1] = -1.0;
-  points[0][2] = -1.0;
+  //instaniate all point_3d objects in cube_points array
+  cube_points[0] = new point_3D(-1.0, -1.0, -1.0);
+  cube_points[1] = new point_3D(-1.0, -1.0,  1.0);
+  cube_points[2] = new point_3D(-1.0,  1.0, -1.0);
+  cube_points[3] = new point_3D(-1.0,  1.0,  1.0);
+  cube_points[4] = new point_3D( 1.0, -1.0, -1.0);
+  cube_points[5] = new point_3D( 1.0, -1.0,  1.0);
+  cube_points[6] = new point_3D( 1.0,  1.0, -1.0);
+  cube_points[7] = new point_3D( 1.0,  1.0,  1.0);
   
-  points[1][0] = -1.0;
-  points[1][1] = -1.0;
-  points[1][2] = 1.0;
-  
-  points[2][0] = -1.0;
-  points[2][1] = 1.0;
-  points[2][2] = -1.0;
-  
-  points[3][0] = -1.0;
-  points[3][1] = 1.0;
-  points[3][2] = 1.0;
-  
-  points[4][0] = 1.0;
-  points[4][1] = -1.0;
-  points[4][2] = -1.0;
-  
-  points[5][0] = 1.0;
-  points[5][1] = -1.0;
-  points[5][2] = 1.0;
-   
-  points[6][0] = 1.0;
-  points[6][1] = 1.0;
-  points[6][2] = -1.0;
-  
-  points[7][0] = 1.0;
-  points[7][1] = 1.0;
-  points[7][2] = 1.0;
-  
-  edge[0][0] = 0;
-  edge[0][1] = 1;
-  
-  edge[1][0] = 0;
-  edge[1][1] = 2;
-  
-  edge[2][0] = 0;
-  edge[2][1] = 4;
-  
-  edge[3][0] = 1;
-  edge[3][1] = 3;
-  
-  edge[4][0] = 1;
-  edge[4][1] = 5;
-  
-  edge[5][0] = 2;
-  edge[5][1] = 3;
-  
-  edge[6][0] = 2;
-  edge[6][1] = 6;
-  
-  edge[7][0] = 3;
-  edge[7][1] = 7;
-  
-  edge[8][0] = 4;
-  edge[8][1] = 5;
-  
-  edge[9][0] = 4;
-  edge[9][1] = 6;
-  
-  edge[10][0] = 5;
-  edge[10][1] = 7;
-  
-  edge[11][0] = 6;
-  edge[11][1] = 7;
-   
+  //instaniate the array of edge objects that connect the cube_points array together
+  edges[0] = new edge(0, 1);
+  edges[1] = new edge(0, 2);
+  edges[2] = new edge(0, 4);
+  edges[3] = new edge(1, 3);
+  edges[4] = new edge(1, 5);
+  edges[5] = new edge(2, 3);
+  edges[6] = new edge(2, 6);
+  edges[7] = new edge(3, 7);
+  edges[8] = new edge(4, 5);
+  edges[9] = new edge(4, 6);
+  edges[10] = new edge(5, 7);
+  edges[11] = new edge(6, 7);
+
   size(640, 480);
   background(0);
 }
@@ -86,47 +42,25 @@ void draw() {
  
   rotate_object();
   
-  for (int i = 0; i < points.length; i++) {
+  for (int i = 0; i < cube_points.length; i++) {
     
-    float[] v = translate_vert(points[i]);
-    draw_point(v);
+    point_3D p = translate_vert(cube_points[i]);
+    draw_point(p);
   }
   
   draw_edges();
 }
 
-void rotate_object() {
-    
-   for (int i = 0; i < points.length; i++) {
-   
-     float[] v = vector_maxtrix_multi(points[i], rot_y);
-     points[i][0] = v[0];
-     points[i][1] = v[1];
-     points[i][2] = v[2];
-  }
+point_3D translate_vert(point_3D p) {
   
-}
-
-float[] translate_vert(float[] point) {
+  point_3D new_point = new point_3D(p.x, p.y, p.z);
+  point_3D translation = new point_3D(0.0, 0.0, -4.0);
   
-  float[] trans_vert = new float[3];
+  new_point.x += translation.x;
+  new_point.y += translation.y;
+  new_point.z += translation.z;
   
-  trans_vert[0] = point[0];
-  trans_vert[1] = point[1];
-  trans_vert[2] = point[2];
-  
-  float[] translation = new float[3];
-  
-  translation[0] = 0;
-  translation[1] = 0;
-  translation[2] = -6;
-
-  trans_vert[0] += translation[0];
-  trans_vert[1] += translation[1];
-  trans_vert[2] += translation[2];
-  
-  return trans_vert;
-  
+  return new_point;
 }
 
 void mouseWheel(MouseEvent event) {
@@ -135,93 +69,85 @@ void mouseWheel(MouseEvent event) {
   
   if (e > 0) {
   
-    zoom += 1;
+    zoom += 5;
   
   } else {
     
-    zoom -= 1;
+    zoom -= 5;
   }
  
 }
 
 void mouseClicked() {
   
-  float[] p = new float[3];
-  p[0] = 12;
-  p[1] = 17;
-  p[2] = 4;
-  
-  float[] v = vector_maxtrix_multi(p, 0.0);
-  
-  println(rot_y);
-
 }
 
-void draw_point(float[] p) { 
+void draw_point(point_3D p) { 
   
   int p_size = 5;
-  float x = p[0];
-  float y = p[1];
-  float z = p[2];
+    
+  p.x = p.x / p.z; //perspective calculation
+  p.y = p.y / p.z; //perspective calculation
   
-  x = x / z; //perspective calculation
-  y = y / z; //perspective calculation
+  p.x *= zoom;
+  p.y *= zoom;
   
-  x *= zoom;
-  y *= zoom;
-  
-  x = x + width / 2;
-  y = -y + height / 2;
+  p.x = p.x + width / 2;
+  p.y = -p.y + height / 2;
   
   noStroke();
-  ellipse(x, y, p_size, p_size);
+  fill(255);
+  ellipse(p.x, p.y, p_size, p_size);
+}
+
+void rotate_object() {
+    
+   for (int i = 0; i < cube_points.length; i++) {
+   
+     point_3D p = vector_maxtrix_multi(cube_points[i], rot_y);
+     cube_points[i].x = p.x;
+     cube_points[i].y = p.y;
+     cube_points[i].z = p.z;
+  }
 }
 
 void draw_edges() {
   
-  for(int i = 0; i < edge.length; i++) {
+  for(int i = 0; i < edges.length; i++) {
     
-    int p1 = edge[i][0];
-    int p2 = edge[i][1];
+    int p1_i = edges[i].p1_index;
+    int p2_i = edges[i].p2_index;
     
-    float[] v1 = translate_vert(points[p1]);
-    float[] v2 = translate_vert(points[p2]);
+    point_3D p1 = translate_vert(cube_points[p1_i]);
+    point_3D p2 = translate_vert(cube_points[p2_i]);
+        
+    p1.x = p1.x / p1.z; //perspective calculation
+    p1.y = p1.y / p1.z; //perspective calculation
     
-    float x1 = v1[0];
-    float y1 = v1[1];
-    float z1 = v1[2];
+    p2.x = p2.x / p2.z; //perspective calculation
+    p2.y = p2.y / p2.z; //perspective calculation
+
+    p1.x *= zoom;
+    p1.y *= zoom;
     
-    float x2 = v2[0];
-    float y2 = v2[1];
-    float z2 = v2[2];
+    p2.x *= zoom;
+    p2.y *= zoom;
     
-    x1 = x1 / z1; //perspective calculation
-    y1 = y1 / z1; //perspective calculation
+    p1.x = p1.x + width / 2;
+    p1.y = -p1.y + height / 2;
     
-    x2 = x2 / z2; //perspective calculation
-    y2 = y2 / z2; //perspective calculation
-  
-    x1 *= zoom;
-    y1 *= zoom;
-    
-    x2 *= zoom;
-    y2 *= zoom;
-  
-    x1 = x1 + width / 2;
-    y1 = -y1 + height / 2;
-    
-    x2 = x2 + width / 2;
-    y2 = -y2 + height / 2;
-    
+    p2.x = p2.x + width / 2;
+    p2.y = -p2.y + height / 2;
+        
     stroke(0,200,0);
-    line(x1, y1, x2, y2);
+    line(p1.x, p1.y, p2.x, p2.y);
   }
   
 }
 
-float[] vector_maxtrix_multi(float[] point, float degrees) {
+point_3D vector_maxtrix_multi(point_3D p, float degrees) {
   
-  float[] new_vector = new float[3];
+  point_3D new_point = new point_3D();
   float[][] matrix = new float[3][3];
   
   float rad = radians(degrees);
@@ -238,11 +164,11 @@ float[] vector_maxtrix_multi(float[] point, float degrees) {
   matrix[2][1] = 0;
   matrix[2][2] = cos(rad);
   
-  new_vector[0] = matrix[0][0] * point[0] + matrix[0][1] * point[1] + matrix[0][2] * point[2];
-  new_vector[1] = matrix[1][0] * point[0] + matrix[1][1] * point[1] + matrix[1][2] * point[2];
-  new_vector[2] = matrix[2][0] * point[0] + matrix[2][1] * point[1] + matrix[2][2] * point[2];
+  new_point.x = matrix[0][0] * p.x + matrix[0][1] * p.y + matrix[0][2] * p.z;
+  new_point.y = matrix[1][0] * p.x + matrix[1][1] * p.y + matrix[1][2] * p.z;
+  new_point.z = matrix[2][0] * p.x + matrix[2][1] * p.y + matrix[2][2] * p.z;
   
-  return new_vector;
+  return new_point;
 }
 
 void draw_axis() {
