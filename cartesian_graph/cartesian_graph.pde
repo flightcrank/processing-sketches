@@ -3,7 +3,9 @@ point_3D[] cube_points = new point_3D[8];
 edge[] edges = new edge[12];
 
 float zoom = 400; //pixels
-float rot_y = 2.0;
+float rot_x = 1;
+float rot_y = 1;
+float rot_z = .1;
 
 void setup() {
   
@@ -39,22 +41,20 @@ void draw() {
   
   background(0);
   draw_axis();
- 
   rotate_object();
+  draw_edges();
   
   for (int i = 0; i < cube_points.length; i++) {
     
     point_3D p = translate_vert(cube_points[i]);
     draw_point(p);
   }
-  
-  draw_edges();
 }
 
 point_3D translate_vert(point_3D p) {
   
   point_3D new_point = new point_3D(p.x, p.y, p.z);
-  point_3D translation = new point_3D(0.0, 0.0, -4.0);
+  point_3D translation = new point_3D(0.0, 0.0, -6.0);
   
   new_point.x += translation.x;
   new_point.y += translation.y;
@@ -84,7 +84,7 @@ void mouseClicked() {
 
 void draw_point(point_3D p) { 
   
-  int p_size = 5;
+  int p_size = 10;
     
   p.x = p.x / p.z; //perspective calculation
   p.y = p.y / p.z; //perspective calculation
@@ -104,7 +104,19 @@ void rotate_object() {
     
    for (int i = 0; i < cube_points.length; i++) {
    
-     point_3D p = vector_maxtrix_multi(cube_points[i], rot_y);
+     matrix rotation_x = new matrix();
+     matrix rotation_y = new matrix();
+     matrix rotation_z = new matrix();
+
+     rotation_x.set_x_rotation_matrix(rot_x);
+     rotation_y.set_y_rotation_matrix(rot_y);
+     rotation_z.set_z_rotation_matrix(rot_z);
+     
+     matrix m = new matrix();
+     m = m.matrix_matrix_multi(rotation_x, rotation_y);
+     
+     point_3D p = m.vector_matrix_multi(cube_points[i]);
+
      cube_points[i].x = p.x;
      cube_points[i].y = p.y;
      cube_points[i].z = p.z;
@@ -142,33 +154,6 @@ void draw_edges() {
     stroke(0,200,0);
     line(p1.x, p1.y, p2.x, p2.y);
   }
-  
-}
-
-point_3D vector_maxtrix_multi(point_3D p, float degrees) {
-  
-  point_3D new_point = new point_3D();
-  float[][] matrix = new float[3][3];
-  
-  float rad = radians(degrees);
-  
-  matrix[0][0] = cos(rad);
-  matrix[0][1] = 0;
-  matrix[0][2] = -(sin(rad));
-  
-  matrix[1][0] = 0;
-  matrix[1][1] = 1;
-  matrix[1][2] = 0;
-  
-  matrix[2][0] = sin(rad);
-  matrix[2][1] = 0;
-  matrix[2][2] = cos(rad);
-  
-  new_point.x = matrix[0][0] * p.x + matrix[0][1] * p.y + matrix[0][2] * p.z;
-  new_point.y = matrix[1][0] * p.x + matrix[1][1] * p.y + matrix[1][2] * p.z;
-  new_point.z = matrix[2][0] * p.x + matrix[2][1] * p.y + matrix[2][2] * p.z;
-  
-  return new_point;
 }
 
 void draw_axis() {
