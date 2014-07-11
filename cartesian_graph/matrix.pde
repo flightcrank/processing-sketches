@@ -87,5 +87,4 @@ class matrix {
     
     return m;
   }
-  
 }

@@ -1,11 +1,12 @@
 
 point_3D[] cube_points = new point_3D[8];
 edge[] edges = new edge[12];
+triangle[] tris = new triangle[12];
 
 float zoom = 400; //pixels
 float rot_x = 1;
 float rot_y = 1;
-float rot_z = .1;
+float rot_z = .5;
 
 void setup() {
   
@@ -32,7 +33,21 @@ void setup() {
   edges[9] = new edge(4, 6);
   edges[10] = new edge(5, 7);
   edges[11] = new edge(6, 7);
-
+  
+  //instaniate the array of trinagle objects that connect the cube_points array together
+  tris[0] = new triangle(0, 2, 6);
+  tris[1] = new triangle(6, 4, 0);
+  tris[2] = new triangle(1, 5, 7);
+  tris[3] = new triangle(7, 3, 1);
+  tris[4] = new triangle(0, 4, 5);
+  tris[5] = new triangle(5, 1, 0);
+  tris[6] = new triangle(4, 6, 7);
+  tris[7] = new triangle(7, 5, 4);
+  tris[8] = new triangle(6, 2, 3);
+  tris[9] = new triangle(3, 7, 6);
+  tris[10] = new triangle(2, 0, 1);
+  tris[11] = new triangle(1, 3, 2);
+  
   size(640, 480);
   background(0);
 }
@@ -113,7 +128,8 @@ void rotate_object() {
      rotation_z.set_z_rotation_matrix(rot_z);
      
      matrix m = new matrix();
-     m = m.matrix_matrix_multi(rotation_x, rotation_y);
+     m = m.matrix_matrix_multi(rotation_y, rotation_z);
+     m = m.matrix_matrix_multi(m, rotation_x);
      
      point_3D p = m.vector_matrix_multi(cube_points[i]);
 
@@ -124,6 +140,39 @@ void rotate_object() {
 }
 
 void draw_edges() {
+  
+  for(int i = 0; i < edges.length; i++) {
+    
+    int p1_i = edges[i].p1_index;
+    int p2_i = edges[i].p2_index;
+    
+    point_3D p1 = translate_vert(cube_points[p1_i]);
+    point_3D p2 = translate_vert(cube_points[p2_i]);
+        
+    p1.x = p1.x / p1.z; //perspective calculation
+    p1.y = p1.y / p1.z; //perspective calculation
+    
+    p2.x = p2.x / p2.z; //perspective calculation
+    p2.y = p2.y / p2.z; //perspective calculation
+
+    p1.x *= zoom;
+    p1.y *= zoom;
+    
+    p2.x *= zoom;
+    p2.y *= zoom;
+    
+    p1.x = p1.x + width / 2;
+    p1.y = -p1.y + height / 2;
+    
+    p2.x = p2.x + width / 2;
+    p2.y = -p2.y + height / 2;
+        
+    stroke(0,200,0);
+    line(p1.x, p1.y, p2.x, p2.y);
+  }
+}
+
+void draw_tris() {
   
   for(int i = 0; i < edges.length; i++) {
     
