@@ -11,13 +11,13 @@ void setup() {
     tri[i] = new Point2D(x,y);
   }
   
-  tri[0].x = 3;
-  tri[0].y = 3;
-  tri[1].x = 2;
-  tri[1].y = 6;
-  tri[2].x = 5;
-  tri[2].y = 7;
-    
+  tri[0].x = 100;
+  tri[0].y = 100;
+  tri[1].x = 200;
+  tri[1].y = 100;
+  tri[2].x = 150;
+  tri[2].y = 110;
+      
   size(640, 480);
   background(0);
 }
@@ -32,7 +32,7 @@ void draw() {
     draw_point(tri[i].x,tri[i].y);
   }
   
-  fill_tri();
+  //fill_tri();
 
   stroke(255,0,0);
   line(tri[0].x, tri[0].y, tri[1].x, tri[1].y);
@@ -59,7 +59,8 @@ void create_triangle() {
 }
 
 void fill_tri() {
-int top = height;
+    
+    int top = height;
     int bottom = 0;
     int top_index = -1;
     int mid_index = -1;
@@ -84,11 +85,20 @@ int top = height;
     //calculate the middle point
     mid_index = 3 - (top_index + bottom_index);
     
+    println("top = " + top_index);
+    println("middle = " + mid_index);
+    println("bottom = " + bottom_index);
+    
     //find all starting x values for line from top point
     //to the bottom point (longest triangle edge)
     int dx = tri[bottom_index].x - tri[top_index].x;
     int dy = tri[bottom_index].y - tri[top_index].y;
     float slope = (float)dx / dy;
+    
+    println("--- top to bottom ---");
+    println("dx = " + dx);
+    println("dy = " + dy);
+    println("slope = " + slope);
     
     float[] edge1 = new float[dy];//edge from top point to bottom point
     float[] edge2 = new float[dy];//other side of triangle(both edges)
@@ -109,6 +119,11 @@ int top = height;
     dx = tri[mid_index].x - tri[top_index].x;
     dy = tri[mid_index].y - tri[top_index].y;
     slope = (float)dx / dy;
+    
+    println("--- top to middle ---");
+    println("dx = " + dx);
+    println("dy = " + dy);
+    println("slope = " + slope);
    
     for(int i = 0; i < dy; i++) {
       
@@ -127,17 +142,23 @@ int top = height;
     dy = tri[bottom_index].y - tri[mid_index].y;
     slope = (float)dx / dy;
     
+    println("---  middle to bottom ---");
+    println("dx = " + dx);
+    println("dy = " + dy);
+    println("slope = " + slope);
+    
     int start = tri[mid_index].y - tri[top_index].y;
     
     for(int i = start; i < edge2.length; i++) {
       
+      //flat top tri
       if (i == 0) {
-      
+        
         edge2[i] = tri[top_index].x + slope;
         continue;
       }
-            
-      edge2[i] = edge2[i - 1] + slope;      
+      edge2[i] = edge2[i - 1] + slope;  
+      
     }
 
     //fill the gap between the x vaules of the 2 edge arrays    
@@ -174,7 +195,12 @@ void mousePressed() {
     println("C x = " + tri[2].x + " C y = " + tri[2].y + "\n");
     
   } else if (mouseButton == RIGHT) {
-     
+    
+    println("A x = " + tri[0].x + " A y = " + tri[0].y );
+    println("B x = " + tri[1].x + " B y = " + tri[1].y);
+    println("C x = " + tri[2].x + " C y = " + tri[2].y + "\n");
+    fill_tri();
+    
   } 
 }
 void draw_point(int x, int y) { 
@@ -185,7 +211,6 @@ void draw_point(int x, int y) {
   fill(255);
   ellipse(x, y, p_size, p_size);
 }
-
 
 void draw_axis() {
 
