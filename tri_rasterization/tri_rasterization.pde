@@ -11,11 +11,11 @@ void setup() {
     tri[i] = new Point2D(x,y);
   }
   
-  tri[0].x = 7;
-  tri[0].y = 2;
-  tri[1].x = 4;
-  tri[1].y = 8;
-  tri[2].x = 9;
+  tri[0].x = 3;
+  tri[0].y = 3;
+  tri[1].x = 2;
+  tri[1].y = 6;
+  tri[2].x = 5;
   tri[2].y = 7;
     
   size(640, 480);
@@ -31,8 +31,10 @@ void draw() {
     
     draw_point(tri[i].x,tri[i].y);
   }
+  
+  fill_tri();
 
-  stroke(255);
+  stroke(255,0,0);
   line(tri[0].x, tri[0].y, tri[1].x, tri[1].y);
   line(tri[1].x, tri[1].y, tri[2].x, tri[2].y);
   line(tri[2].x, tri[2].y, tri[0].x, tri[0].y);
@@ -54,18 +56,16 @@ void create_triangle() {
     tri[i].x = (int)random(10, width - 10);
     tri[i].y = (int)random(10, height - 10);
   }
-
 }
 
-void sort_tri() {
-
-    //sort edges from longest to shortest in the y axis
-    int top = height;
+void fill_tri() {
+int top = height;
     int bottom = 0;
     int top_index = -1;
     int mid_index = -1;
     int bottom_index = -1;
-    
+
+    //sort edges from longest to shortest in the y axis
     for(int i = 0; i < tri.length; i++) {
       
       if (tri[i].y < top) {
@@ -81,22 +81,18 @@ void sort_tri() {
       }
     }
     
+    //calculate the middle point
     mid_index = 3 - (top_index + bottom_index);
-
+    
+    //find all starting x values for line from top point
+    //to the bottom point (longest triangle edge)
     int dx = tri[bottom_index].x - tri[top_index].x;
     int dy = tri[bottom_index].y - tri[top_index].y;
     float slope = (float)dx / dy;
+    
     float[] edge1 = new float[dy];//edge from top point to bottom point
-    float[] edge2 = new float[dy];
-    
-    
-    println("top = " + top_index);
-    println("bottom = " + bottom_index);
-    println("middle = " + mid_index);
-    println("--- top point to bottom point ---");
-    println("dx = " + dx + " dy = " + dy);
-    println("slope = " + slope + "\n");
-    
+    float[] edge2 = new float[dy];//other side of triangle(both edges)
+
     for(int i = 0; i < edge1.length; i++) {
       
       if (i == 0) {
@@ -108,21 +104,64 @@ void sort_tri() {
       edge1[i] = edge1[i - 1] + slope;      
     }
     
-    //round last element to closes int
-    edge1[edge1.length - 1] = round(edge1[edge1.length - 1]);
+    //find all starting x values for line from top point
+    //to the middle point
+    dx = tri[mid_index].x - tri[top_index].x;
+    dy = tri[mid_index].y - tri[top_index].y;
+    slope = (float)dx / dy;
+   
+    for(int i = 0; i < dy; i++) {
       
-    for(int i = 0; i < edge1.length; i++) {
-    
-      println(edge1[i]);
+      if (i == 0) {
+      
+        edge2[i] = tri[top_index].x + slope;
+        continue;
+      }
+            
+      edge2[i] = edge2[i - 1] + slope;      
     }
     
-    dx = tri[bottom_index].x - tri[top_index].x;
-    dy = tri[bottom_index].y - tri[top_index].y;
+    //find all starting x values for line from midddle point
+    //to the bottom point
+    dx = tri[bottom_index].x - tri[mid_index].x;
+    dy = tri[bottom_index].y - tri[mid_index].y;
     slope = (float)dx / dy;
     
-    println("--- top point to middle point ---");
-    println("dx = " + dx + " dy = " + dy);
-    println("slope = " + slope + "\n");
+    int start = tri[mid_index].y - tri[top_index].y;
+    
+    for(int i = start; i < edge2.length; i++) {
+      
+      if (i == 0) {
+      
+        edge2[i] = tri[top_index].x + slope;
+        continue;
+      }
+            
+      edge2[i] = edge2[i - 1] + slope;      
+    }
+
+    //fill the gap between the x vaules of the 2 edge arrays    
+    color c = color(255);
+    
+    for(int i = 0; i < edge1.length; i++) {
+      
+      //fill from the lowest value (left) 
+      //to the highest value (right)
+      if (edge1[i] < edge2[i]) {
+                
+        for(int j = (int)edge1[i]; j < (int)edge2[i]; j++) {
+          
+          set(j, tri[top_index].y + i , c);
+        }
+        
+      } else {
+        
+        for(int j = (int)edge2[i]; j < edge1[i]; j++) {
+          
+            set(j, tri[top_index].y + i, c);
+        }
+      }
+    }
 }
 
 void mousePressed() {
@@ -136,7 +175,6 @@ void mousePressed() {
     
   } else if (mouseButton == RIGHT) {
      
-    sort_tri();
   } 
 }
 void draw_point(int x, int y) { 
