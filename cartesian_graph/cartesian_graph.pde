@@ -57,7 +57,8 @@ void draw() {
   background(0);
   draw_axis();
   rotate_object();
-  draw_edges();
+  //draw_edges();
+  draw_tris();
   
   for (int i = 0; i < cube_points.length; i++) {
     
@@ -174,19 +175,24 @@ void draw_edges() {
 
 void draw_tris() {
   
-  for(int i = 0; i < edges.length; i++) {
+  for(int i = 0; i < tris.length; i++) {
     
-    int p1_i = edges[i].p1_index;
-    int p2_i = edges[i].p2_index;
+    int p1_i = tris[i].p1_index;
+    int p2_i = tris[i].p2_index;
+    int p3_i = tris[i].p3_index;
     
     point_3D p1 = translate_vert(cube_points[p1_i]);
     point_3D p2 = translate_vert(cube_points[p2_i]);
+    point_3D p3 = translate_vert(cube_points[p3_i]);
         
     p1.x = p1.x / p1.z; //perspective calculation
     p1.y = p1.y / p1.z; //perspective calculation
     
     p2.x = p2.x / p2.z; //perspective calculation
     p2.y = p2.y / p2.z; //perspective calculation
+    
+    p3.x = p3.x / p3.z; //perspective calculation
+    p3.y = p3.y / p3.z; //perspective calculation
 
     p1.x *= zoom;
     p1.y *= zoom;
@@ -194,15 +200,117 @@ void draw_tris() {
     p2.x *= zoom;
     p2.y *= zoom;
     
+    p3.x *= zoom;
+    p3.y *= zoom;
+    
     p1.x = p1.x + width / 2;
     p1.y = -p1.y + height / 2;
     
     p2.x = p2.x + width / 2;
     p2.y = -p2.y + height / 2;
+    
+    p3.x = p3.x + width / 2;
+    p3.y = -p3.y + height / 2;
+        
+    fill_tri(p1, p2 ,p3);
         
     stroke(0,200,0);
     line(p1.x, p1.y, p2.x, p2.y);
+    line(p2.x, p2.y, p3.x, p3.y);
+    line(p3.x, p3.y, p1.x, p1.y);
   }
+}
+
+void fill_tri(point_3D p1, point_3D p2, point_3D p3) {
+  
+    point_3D[] tri = new point_3D[3];
+    
+    tri[0] = p1;
+    tri[1] = p2;
+    tri[2] = p3;
+  
+    int top = height;
+    int bottom = 0;
+    int top_index = -1;
+    int mid_index = -1;
+    int bottom_index = -1;
+    
+    //sort edges from longest to shortest in the y axis
+    for(int i = 0; i < tri.length; i++) {
+      
+      if (tri[i].y < top) {
+        
+        top = (int)tri[i].y;
+        top_index = i;
+      }
+      
+      if (tri[i].y > bottom) {
+        
+        bottom = (int)tri[i].y;
+        bottom_index = i;
+      }
+    }
+    
+    //calculate the middle point
+    mid_index = 3 - (top_index + bottom_index);
+    
+    //find all starting x values for line from top point
+    //to the bottom point (longest triangle edge)
+    int dx = (int)tri[bottom_index].x - (int)tri[top_index].x;
+    int dy = (int)tri[bottom_index].y - (int)tri[top_index].y;
+    float slope = (float)dx / dy;
+    
+    float[] edge1 = new float[dy];//edge from top point to bottom point
+    float[] edge2 = new float[dy];//other side of triangle(both edges)
+    
+    //fill all of edge 1 which is the top point to the bottom point
+    for(int i = 0; i < edge1.length; i++) {
+    
+      if (i == 0) {
+      
+        edge1[i] = tri[top_index].x + slope;
+        continue;
+      }
+            
+      edge1[i] = edge1[i - 1] + slope;      
+    }
+    
+    //find all starting x values for line from top point
+    //to the middle point
+    dx = (int)tri[mid_index].x - (int)tri[top_index].x;
+    dy = (int)tri[mid_index].y - (int)tri[top_index].y;
+    slope = (float)dx / dy;
+    
+    for(int i = 0; i < dy; i++) {
+      
+      if (i == 0) {
+      
+        edge2[i] = tri[top_index].x + slope;
+        continue;
+      }
+            
+      edge2[i] = edge2[i - 1] + slope;      
+    }
+    
+    //find all starting x values for line from midddle point
+    //to the bottom point
+    dx = (int)tri[bottom_index].x - (int)tri[mid_index].x;
+    dy = (int)tri[bottom_index].y - (int)tri[mid_index].y;
+    slope = (float)dx / dy;
+    
+    int start = (int)tri[mid_index].y - (int)tri[top_index].y;
+    
+    for(int i = start; i < edge2.length; i++) {
+      
+      if (i == 0) {
+        
+        edge2[i] = tri[mid_index].x + slope;
+        continue;
+      }
+      
+      edge2[i] = edge2[i - 1] + slope;  
+    }
+    
 }
 
 void draw_axis() {
