@@ -1,7 +1,12 @@
 
+//screen width and height
+int width = 640;
+int height = 480;
+
 point_3D[] cube_points = new point_3D[8];
 edge[] edges = new edge[12];
 triangle[] tris = new triangle[12];
+float[][] zbuffer = new float[height][width];
 
 float zoom = 400; //pixels
 float rot_x = 1;
@@ -9,6 +14,9 @@ float rot_y = 1;
 float rot_z = .5;
 
 void setup() {
+  
+  size(width, height);
+  background(0);
   
   //instaniate all point_3d objects in cube_points array
   cube_points[0] = new point_3D(-1.0, -1.0, -1.0);
@@ -48,23 +56,38 @@ void setup() {
   tris[10] = new triangle(2, 0, 1);
   tris[11] = new triangle(1, 3, 2);
   
-  size(640, 480);
-  background(0);
+  //inisilise zbuffer
+  for(int i = 0; i < zbuffer.length; i++) {
+    
+    for(int j = 0; j < zbuffer[i].length; j++) {
+    
+        zbuffer[i][j] = -1000;
+    }
+  }
 }
 
 void draw() {
   
+  //reset zbuffer
+  for(int i = 0; i < zbuffer.length; i++) {
+    
+    for(int j = 0; j < zbuffer[i].length; j++) {
+    
+        zbuffer[i][j] = -1000;
+    }
+  }
+  
   background(0);
   draw_axis();
   rotate_object();
-  //draw_edges();
   draw_tris();
+  //draw_edges();
   
-  for (int i = 0; i < cube_points.length; i++) {
-    
-    point_3D p = translate_vert(cube_points[i]);
-    draw_point(p);
-  }
+//  for (int i = 0; i < cube_points.length; i++) {
+//    
+//    point_3D p = translate_vert(cube_points[i]);
+//    draw_point(p);
+//  }
 }
 
 point_3D translate_vert(point_3D p) {
@@ -94,8 +117,26 @@ void mouseWheel(MouseEvent event) {
  
 }
 
-void mouseClicked() {
+void mousePressed() {
+    
+  if (mouseButton == LEFT) {
+    
+    println("test");
+    
+  } 
   
+  if (mouseButton == RIGHT) {
+               
+//    //print zbuffer
+//    for(int i = 0; i < 5; i++) {
+//      
+//      for(int j = 0; j < 10; j++) {
+//      
+//          //print(zbuffer[i][j]);
+//      }
+//      print("\n");
+//    }
+  }
 }
 
 void draw_point(point_3D p) { 
@@ -112,7 +153,7 @@ void draw_point(point_3D p) {
   p.y = -p.y + height / 2;
   
   noStroke();
-  fill(255);
+  fill(0, 128, 0);
   ellipse(p.x, p.y, p_size, p_size);
 }
 
@@ -211,17 +252,20 @@ void draw_tris() {
     
     p3.x = p3.x + width / 2;
     p3.y = -p3.y + height / 2;
+    
+    //averge z value of whole triangle
+    float z_avg = (p1.z + p2.z + p3.z) / 3;
+       
+    fill_tri(p1, p2 ,p3, tris[i].c, z_avg);
         
-    fill_tri(p1, p2 ,p3);
-        
-    stroke(0,200,0);
-    line(p1.x, p1.y, p2.x, p2.y);
-    line(p2.x, p2.y, p3.x, p3.y);
-    line(p3.x, p3.y, p1.x, p1.y);
+    //stroke(0,200,0);
+    //line(p1.x, p1.y, p2.x, p2.y);
+    //line(p2.x, p2.y, p3.x, p3.y);
+    //line(p3.x, p3.y, p1.x, p1.y);
   }
 }
 
-void fill_tri(point_3D p1, point_3D p2, point_3D p3) {
+void fill_tri(point_3D p1, point_3D p2, point_3D p3, color c, float z) {
   
     point_3D[] tri = new point_3D[3];
     
@@ -311,6 +355,43 @@ void fill_tri(point_3D p1, point_3D p2, point_3D p3) {
       edge2[i] = edge2[i - 1] + slope;  
     }
     
+    //fill the gap between the x vaules of the 2 edge arrays    
+    //color c = color(255);
+    
+    for(int i = 0; i < edge1.length; i++) {
+      
+      //fill from the lowest value (left) 
+      //to the highest value (right)
+      if (edge1[i] < edge2[i]) {
+                
+        for(int j = (int)edge1[i]; j < (int)edge2[i]; j++) {         
+          
+          int x = j;
+          int y = (int)tri[top_index].y + i;
+          
+          if (z > zbuffer[y][x]) {
+            
+            zbuffer[y][x] = z;
+            set(x, y ,c);            
+          }
+
+        }
+        
+      } else {
+        
+        for(int j = (int)edge2[i]; j < edge1[i]; j++) {
+            
+            int x = j;
+            int y = (int)tri[top_index].y + i;
+            
+            if (z > zbuffer[y][x]) {
+            
+              zbuffer[y][x] = z;
+              set(x, y ,c);            
+            }
+        }
+      }
+    }
 }
 
 void draw_axis() {
