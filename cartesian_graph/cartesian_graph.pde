@@ -3,10 +3,9 @@
 int width = 640;
 int height = 480;
 
-point_3D[] cube_points = new point_3D[8];
-edge[] edges = new edge[12];
-triangle[] tris = new triangle[12];
 float[][] zbuffer = new float[height][width];
+mesh cube = new mesh();
+
 
 float zoom = 400; //pixels
 float rot_x = 1;
@@ -18,31 +17,16 @@ void setup() {
   size(width, height);
   background(0);
   
-  //instaniate all point_3d objects in cube_points array
-  cube_points[0] = new point_3D(-1.0, -1.0, -1.0);
-  cube_points[1] = new point_3D(-1.0, -1.0,  1.0);
-  cube_points[2] = new point_3D(-1.0,  1.0, -1.0);
-  cube_points[3] = new point_3D(-1.0,  1.0,  1.0);
-  cube_points[4] = new point_3D( 1.0, -1.0, -1.0);
-  cube_points[5] = new point_3D( 1.0, -1.0,  1.0);
-  cube_points[6] = new point_3D( 1.0,  1.0, -1.0);
-  cube_points[7] = new point_3D( 1.0,  1.0,  1.0);
+  //instaniate all mesh vertex objects so we can populate them with values
+  for (int i = 0; i < verts.length; i++) {
+    
+      cube.verts[i] = new vertex();
+    }
   
-  //instaniate the array of edge objects that connect the cube_points array together
-  edges[0] = new edge(0, 1);
-  edges[1] = new edge(0, 2);
-  edges[2] = new edge(0, 4);
-  edges[3] = new edge(1, 3);
-  edges[4] = new edge(1, 5);
-  edges[5] = new edge(2, 3);
-  edges[6] = new edge(2, 6);
-  edges[7] = new edge(3, 7);
-  edges[8] = new edge(4, 5);
-  edges[9] = new edge(4, 6);
-  edges[10] = new edge(5, 7);
-  edges[11] = new edge(6, 7);
-  
-  //instaniate the array of trinagle objects that connect the cube_points array together
+  //populate the local co-ords of an object
+  cube.create_verts();
+   
+  //instaniate the array of trinagle objects that connect the verts array together
   tris[0] = new triangle(0, 2, 6);
   tris[1] = new triangle(6, 4, 0);
   tris[2] = new triangle(1, 5, 7);
@@ -79,15 +63,20 @@ void draw() {
   
   background(0);
   draw_axis();
-  rotate_object();
-  draw_tris();
-  //draw_edges();
   
-//  for (int i = 0; i < cube_points.length; i++) {
-//    
-//    point_3D p = translate_vert(cube_points[i]);
-//    draw_point(p);
-//  }
+  //calculate rotaion in local space before translation
+  rotate_object(cube);
+  
+  //calculate world and screen co-ords for all verts
+  for (int i = 0; i < cube.verts.length; i++) {
+    
+    cube.verts[i].world = translate_vert(cube.verts[i].local);
+    cube.verts[i].screen = project_vert(cube.verts[i].world);
+  }
+  
+  draw_points();
+  //draw_tris();
+  draw_edges();
 }
 
 point_3D translate_vert(point_3D p) {
@@ -121,45 +110,46 @@ void mousePressed() {
     
   if (mouseButton == LEFT) {
     
-    println("test");
-    
+    //println(verts.length);
   } 
   
   if (mouseButton == RIGHT) {
-               
-//    //print zbuffer
-//    for(int i = 0; i < 5; i++) {
-//      
-//      for(int j = 0; j < 10; j++) {
-//      
-//          //print(zbuffer[i][j]);
-//      }
-//      print("\n");
-//    }
+
   }
 }
 
-void draw_point(point_3D p) { 
+point_3D project_vert(point_3D p) {
+
+  point_3D proj = new point_3D();
   
-  int p_size = 10;
-    
-  p.x = p.x / p.z; //perspective calculation
-  p.y = p.y / p.z; //perspective calculation
+  proj.x = p.x / p.z; //perspective calculation
+  proj.y = p.y / p.z; //perspective calculation
   
-  p.x *= zoom;
-  p.y *= zoom;
+  proj.x = proj.x * zoom;
+  proj.y = proj.y * zoom;
   
-  p.x = p.x + width / 2;
-  p.y = -p.y + height / 2;
+  proj.x = proj.x + width / 2;
+  proj.y = -proj.y + height / 2;
   
-  noStroke();
-  fill(0, 128, 0);
-  ellipse(p.x, p.y, p_size, p_size);
+  return proj;
 }
 
-void rotate_object() {
+void draw_points() { 
+  
+  int p_size = 10;
+   
+  noStroke();
+  fill(0, 128, 0);
+  
+  for (int i = 0; i < cube.verts.length; i++) {
+  
+    ellipse(cube.verts[i].screen.x, cube.verts[i].screen.y, p_size, p_size);
+  }  
+}
+
+void rotate_object(mesh obj) {
     
-   for (int i = 0; i < cube_points.length; i++) {
+   for (int i = 0; i < verts.length; i++) {
    
      matrix rotation_x = new matrix();
      matrix rotation_y = new matrix();
@@ -173,95 +163,43 @@ void rotate_object() {
      m = m.matrix_matrix_multi(rotation_y, rotation_z);
      m = m.matrix_matrix_multi(m, rotation_x);
      
-     point_3D p = m.vector_matrix_multi(cube_points[i]);
-
-     cube_points[i].x = p.x;
-     cube_points[i].y = p.y;
-     cube_points[i].z = p.z;
+     point_3D p = m.vector_matrix_multi(obj.verts[i].local);
+     
+     obj.verts[i].local = p;
   }
 }
 
 void draw_edges() {
   
-  for(int i = 0; i < edges.length; i++) {
+  stroke(0,200,0);
+  
+  for(int i = 0; i < cube.edges.length; i++) {
     
-    int p1_i = edges[i].p1_index;
-    int p2_i = edges[i].p2_index;
+    int p1 = cube.edges[i].p1_index;
+    int p2 = cube.edges[i].p2_index;
     
-    point_3D p1 = translate_vert(cube_points[p1_i]);
-    point_3D p2 = translate_vert(cube_points[p2_i]);
-        
-    p1.x = p1.x / p1.z; //perspective calculation
-    p1.y = p1.y / p1.z; //perspective calculation
-    
-    p2.x = p2.x / p2.z; //perspective calculation
-    p2.y = p2.y / p2.z; //perspective calculation
-
-    p1.x *= zoom;
-    p1.y *= zoom;
-    
-    p2.x *= zoom;
-    p2.y *= zoom;
-    
-    p1.x = p1.x + width / 2;
-    p1.y = -p1.y + height / 2;
-    
-    p2.x = p2.x + width / 2;
-    p2.y = -p2.y + height / 2;
-        
-    stroke(0,200,0);
-    line(p1.x, p1.y, p2.x, p2.y);
+    line(cube.verts[p1].screen.x, cube.verts[p1].screen.y, cube.verts[p2].screen.x, cube.verts[p2].screen.y);
   }
 }
 
 void draw_tris() {
   
+  stroke(0,200,0);
+  
   for(int i = 0; i < tris.length; i++) {
     
-    int p1_i = tris[i].p1_index;
-    int p2_i = tris[i].p2_index;
-    int p3_i = tris[i].p3_index;
-    
-    point_3D p1 = translate_vert(cube_points[p1_i]);
-    point_3D p2 = translate_vert(cube_points[p2_i]);
-    point_3D p3 = translate_vert(cube_points[p3_i]);
-        
-    p1.x = p1.x / p1.z; //perspective calculation
-    p1.y = p1.y / p1.z; //perspective calculation
-    
-    p2.x = p2.x / p2.z; //perspective calculation
-    p2.y = p2.y / p2.z; //perspective calculation
-    
-    p3.x = p3.x / p3.z; //perspective calculation
-    p3.y = p3.y / p3.z; //perspective calculation
-
-    p1.x *= zoom;
-    p1.y *= zoom;
-    
-    p2.x *= zoom;
-    p2.y *= zoom;
-    
-    p3.x *= zoom;
-    p3.y *= zoom;
-    
-    p1.x = p1.x + width / 2;
-    p1.y = -p1.y + height / 2;
-    
-    p2.x = p2.x + width / 2;
-    p2.y = -p2.y + height / 2;
-    
-    p3.x = p3.x + width / 2;
-    p3.y = -p3.y + height / 2;
+    int p1 = tris[i].p1_index;
+    int p2 = tris[i].p2_index;
+    int p3 = tris[i].p3_index;
     
     //averge z value of whole triangle
-    float z_avg = (p1.z + p2.z + p3.z) / 3;
+    float z_avg = (verts[p1].world.z + verts[p2].world.z + verts[p3].world.z) / 3;
        
-    fill_tri(p1, p2 ,p3, tris[i].c, z_avg);
-        
-    //stroke(0,200,0);
-    //line(p1.x, p1.y, p2.x, p2.y);
-    //line(p2.x, p2.y, p3.x, p3.y);
-    //line(p3.x, p3.y, p1.x, p1.y);
+    fill_tri(verts[p1].screen, verts[p2].screen ,verts[p3].screen, tris[i].c, z_avg);
+    
+    //line(verts[p1].screen.x, verts[p1].screen.y, verts[p2].screen.x, verts[p2].screen.y);
+    //line(verts[p2].screen.x, verts[p2].screen.y, verts[p3].screen.x, verts[p3].screen.y);
+    //line(verts[p3].screen.x, verts[p3].screen.y, verts[p1].screen.x, verts[p1].screen.y);
   }
 }
 
