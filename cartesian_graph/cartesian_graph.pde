@@ -4,8 +4,7 @@ int width = 640;
 int height = 480;
 
 float[][] zbuffer = new float[height][width];
-mesh cube = new mesh("cube.obj");
-mesh cube2 = new mesh("cube.obj");
+mesh cube = new mesh("suz.obj");
 
 float zoom = 400; //pixels
 float rot_x = 1;
@@ -52,8 +51,8 @@ void draw() {
   }
   
   draw_points();
-  //draw_tris();
-  //draw_edges();
+  draw_tris();
+  draw_edges();
 }
 
 point_3D translate_vert(point_3D p) {
@@ -92,7 +91,7 @@ void mousePressed() {
       
     if (mouseButton == RIGHT) {
         
-        cube2.print_list();
+        cube.print_list();
     }
 }
 
@@ -151,10 +150,10 @@ void draw_edges() {
   
   stroke(0,200,0);
   
-  for(int i = 0; i < cube.edges.length; i++) {
+  for(int i = 0; i < cube.edges.size(); i++) {
     
-    int p1 = cube.edges[i].p1_index;
-    int p2 = cube.edges[i].p2_index;
+    int p1 = cube.edges.get(i).p1_index;
+    int p2 = cube.edges.get(i).p2_index;
     
     line(cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y, cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y);
   }
@@ -164,20 +163,20 @@ void draw_tris() {
   
     stroke(0,200,0);
       
-    for(int i = 0; i < cube.tris.length; i++) {
+    for(int i = 0; i < cube.tris.size(); i++) {
     
-        int p1 = cube.tris[i].p1_index;
-        int p2 = cube.tris[i].p2_index;
-        int p3 = cube.tris[i].p3_index;
+        int p1 = cube.tris.get(i).p1_index;
+        int p2 = cube.tris.get(i).p2_index;
+        int p3 = cube.tris.get(i).p3_index;
         
         //averge z value of whole triangle
         float z_avg = (cube.vert.get(p1).world.z + cube.vert.get(p2).world.z + cube.vert.get(p3).world.z) / 3;
-           
-        fill_tri(cube.vert.get(p1).screen, cube.vert.get(p2).screen ,cube.vert.get(p3).screen, cube.tris[i].c, z_avg);
+
+        line(cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y, cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y);
+        line(cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y, cube.vert.get(p3).screen.x, cube.vert.get(p3).screen.y);
+        line(cube.vert.get(p3).screen.x, cube.vert.get(p3).screen.y, cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y);
         
-        //line(cube.verts[p1].screen.x, cube.verts[p1].screen.y, cube.verts[p2].screen.x, cube.verts[p2].screen.y);
-        //line(cube.verts[p2].screen.x, cube.verts[p2].screen.y, cube.verts[p3].screen.x, cube.verts[p3].screen.y);
-        //line(cube.verts[p3].screen.x, cube.verts[p3].screen.y, cube.verts[p1].screen.x, cube.verts[p1].screen.y);
+        fill_tri(cube.vert.get(p1).screen, cube.vert.get(p2).screen ,cube.vert.get(p3).screen, cube.tris.get(i).c, z_avg);
     }
 }
 
