@@ -3,10 +3,14 @@
 int width = 640;
 int height = 480;
 
+int frame_count = 0;
+long start_time = millis();
+long elapsed_time = 0;
+
 float[][] zbuffer = new float[height][width];
 mesh cube = new mesh("suz.obj");
 
-float zoom = 400; //pixels
+float zoom = -400; //pixels
 float rot_x = 1;
 float rot_y = 1;
 float rot_z = .5;
@@ -28,14 +32,26 @@ void setup() {
 
 void draw() {
   
-  //reset zbuffer
-  for(int i = 0; i < zbuffer.length; i++) {
+    frame_count++;
+   
+    long current_time = millis();
     
-    for(int j = 0; j < zbuffer[i].length; j++) {
-    
-        zbuffer[i][j] = -1000;
+    //fps counter
+    if (current_time - start_time >= 1000) {
+        
+        println("fps = " + frame_count);
+        start_time = millis();
+        frame_count = 0;
     }
-  }
+    
+    //reset zbuffer
+    for(int i = 0; i < zbuffer.length; i++) {
+    
+        for(int j = 0; j < zbuffer[i].length; j++) {
+        
+            zbuffer[i][j] = -1000;
+        }
+    }
   
   background(0);
   draw_axis();
@@ -50,9 +66,9 @@ void draw() {
     cube.vert.get(i).screen = project_vert(cube.vert.get(i).world);
   }
   
-  draw_points();
+  //draw_points();
   draw_tris();
-  draw_edges();
+  //draw_edges();
 }
 
 point_3D translate_vert(point_3D p) {
@@ -74,11 +90,23 @@ void mouseWheel(MouseEvent event) {
     if (e > 0) {
       
         zoom += 5;
+        
+        if (zoom == 0) {
+            
+            zoom = 5;
+        }
       
     } else {
     
         zoom -= 5;
+        
+        if (zoom == 0) {
+            
+            zoom = -5;
+        }
     }
+    
+    
  
 }
 
@@ -171,12 +199,12 @@ void draw_tris() {
         
         //averge z value of whole triangle
         float z_avg = (cube.vert.get(p1).world.z + cube.vert.get(p2).world.z + cube.vert.get(p3).world.z) / 3;
-
-        line(cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y, cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y);
-        line(cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y, cube.vert.get(p3).screen.x, cube.vert.get(p3).screen.y);
-        line(cube.vert.get(p3).screen.x, cube.vert.get(p3).screen.y, cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y);
-        
+           
         fill_tri(cube.vert.get(p1).screen, cube.vert.get(p2).screen ,cube.vert.get(p3).screen, cube.tris.get(i).c, z_avg);
+        
+//        line(cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y, cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y);
+//        line(cube.vert.get(p2).screen.x, cube.vert.get(p2).screen.y, cube.vert.get(p3).screen.x, cube.vert.get(p3).screen.y);
+//        line(cube.vert.get(p3).screen.x, cube.vert.get(p3).screen.y, cube.vert.get(p1).screen.x, cube.vert.get(p1).screen.y);
     }
 }
 
@@ -271,7 +299,6 @@ void fill_tri(point_3D p1, point_3D p2, point_3D p3, color c, float z) {
     }
 
     //fill the gap between the x vaules of the 2 edge arrays    
-    //color c = color(255);
     for(int i = 0; i < edge1.length; i++) {
       
         //fill from the lowest value (left) 

@@ -75,8 +75,6 @@ class mesh {
             } else {
         
                 String[] pieces = split(line, " ");
-                
-                println(line);
 
                 if (pieces[0].equals("v")) {
 
