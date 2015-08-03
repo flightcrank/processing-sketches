@@ -1,5 +1,6 @@
 
 Object ship = new Object();
+bullet b = new bullet();
 
 void setup() {
     
@@ -16,7 +17,7 @@ void draw() {
     translate(width / 2, height / 2);
     
     if (keyPressed) {
-        
+
         if (key == CODED) {
         
             if (keyCode == LEFT) {
@@ -43,31 +44,37 @@ void draw() {
                 //point in same direction as the nose of the ship is pointing
                 Vector rockets = new Vector(ship.object[0].x , ship.object[0].y);
                 rockets.normalise();
-                rockets.multi(0.01);
-                ship.applyForce(rockets);
-                
+                rockets.multi(0.033);
+                ship.applyForce(rockets);               
             }
         }
     }
- 
+    
     ship.update();
-    
-    
-    line(ship.world[0].x, -ship.world[0].y, ship.world[1].x, -ship.world[1].y);
-    line(ship.world[1].x, -ship.world[1].y, ship.world[2].x, -ship.world[2].y);
-    line(ship.world[2].x, -ship.world[2].y, ship.world[0].x, -ship.world[0].y);
-    
-    for(int i = 0; i <  ship.world.length; i++) {
-        
-        //ellipse(ship.world[i].x, -ship.world[i].y, 10, 10);
-    }
+    b.update();
+    b.display();
 }
 
 void keyPressed() {
-
+    
+    if (key == ' ') {
+        
+        Vector bullet_vel = new Vector(ship.object[0].x , ship.object[0].y);
+        bullet_vel.normalise();
+        bullet_vel.multi(3);
+        
+        
+        b.location.x = ship.world[0].x;
+        b.location.y = ship.world[0].y;
+        b.velocity.x = bullet_vel.x;
+        b.velocity.y = bullet_vel.y;
+        println(b.alive);
+        b.alive = true;
+        println(b.alive);   
+        
+    }
 }
 
-void mouseClicked() {
-                
+void mouseClicked() {       
                 
 }
