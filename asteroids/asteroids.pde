@@ -1,10 +1,16 @@
 
-Object ship = new Object();
-bullet b = new bullet();
+Player ship = new Player();
+Bullet b = new Bullet();
+Bullet[] bullets = new Bullet[6];
 
 void setup() {
     
-    size(640, 480); 
+    size(640, 480);
+    
+    for (int i = 0; i < bullets.length; i++) {
+        
+        bullets[i] = new Bullet();
+    }
 }
 
 void draw() {
@@ -22,19 +28,25 @@ void draw() {
         
             if (keyCode == LEFT) {
                 
-                for(int i = 0; i <  ship.object.length; i++) {
+                for(int i = 0; i <  ship.verts.length; i++) {
 
-                    ship.object[i].rotate(3);
-                    ship.world[i] = ship.world[i].addv(ship.object[i], ship.location);
+                    //rotate verts in object space
+                    ship.verts[i].rotate(3);
+                    
+                    //translate into world space
+                    ship.world[i] = ship.world[i].addv(ship.verts[i], ship.location);
                 }
             }
             
              if (keyCode == RIGHT) {
                 
-                for(int i = 0; i <  ship.object.length; i++) {
-
-                    ship.object[i].rotate(-3);
-                    ship.world[i] = ship.world[i].addv(ship.object[i], ship.location);
+                for(int i = 0; i <  ship.verts.length; i++) {
+                    
+                    //rotate verts in object space
+                    ship.verts[i].rotate(-3);
+                    
+                    //translate into world space
+                    ship.world[i] = ship.world[i].addv(ship.verts[i], ship.location);
                 }
             }
         
@@ -42,39 +54,48 @@ void draw() {
             
                 //create a force that will act as rockets for ship. 
                 //point in same direction as the nose of the ship is pointing
-                Vector rockets = new Vector(ship.object[0].x , ship.object[0].y);
+                Vector rockets = new Vector(ship.verts[0].x , ship.verts[0].y);
                 rockets.normalise();
-                rockets.multi(0.033);
+                rockets.multi(0.055);
                 ship.applyForce(rockets);               
             }
         }
     }
     
     ship.update();
-    b.update();
-    b.display();
+    
+    for (int i = 0; i < bullets.length; i++) {
+        
+        bullets[i].update();
+        bullets[i].bounds();
+    }
 }
 
 void keyPressed() {
     
     if (key == ' ') {
         
-        Vector bullet_vel = new Vector(ship.object[0].x , ship.object[0].y);
-        bullet_vel.normalise();
-        bullet_vel.multi(3);
-        
-        
-        b.location.x = ship.world[0].x;
-        b.location.y = ship.world[0].y;
-        b.velocity.x = bullet_vel.x;
-        b.velocity.y = bullet_vel.y;
-        println(b.alive);
-        b.alive = true;
-        println(b.alive);   
-        
+        for (int i = 0; i < bullets.length; i++) {
+            
+            if (bullets[i].alive == false) {
+                
+                println("i = "+ i );
+                bullets[i].location.x = ship.world[0].x;
+                bullets[i].location.y = -ship.world[0].y;
+                Vector bullet_velocity = new Vector(ship.verts[0].x, ship.verts[0].y);
+                bullet_velocity.normalise();
+                bullet_velocity.multi(4);
+                bullets[i].velocity.x = bullet_velocity.x;
+                bullets[i].velocity.y = -bullet_velocity.y;
+                bullets[i].alive = true;
+                break;
+            }
+        }
+ 
     }
 }
 
 void mouseClicked() {       
-                
+
+    println(ship.location.y);
 }

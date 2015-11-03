@@ -1,35 +1,37 @@
 
-class bullet {
+class Bullet {
 
-    Vector location;
-    Vector velocity;
+    Vector location = new Vector(0,0);
+    Vector velocity = new Vector(0,0);
     boolean alive;
-        
-    public bullet() {
-        
-        location = new Vector(0,0);
-        velocity = new Vector(0,0);
-        alive = false;
+
+    public Bullet() {
+    
+        this.alive = false;
     }
     
     void update() {
 
+        velocity.limit(10);
         location.add(velocity);
-    }
-    
-    void bounds() {
         
-        if (location.x < 0 || location.x > width) {
-            
-            alive = false;
-        }
-    }
-    
-    void display() {
-        
+        //draw bullet
         if (this.alive == true) {
-            
-            ellipse(location.x, -location.y, 5, 5);
+        
+            ellipse(location.x, location.y, 5,5);
         }
+    }
+        
+    public void bounds() {
+    
+            if (location.x < -width / 2 || location.x > width / 2) {
+
+                this.alive = false;
+            }
+            
+            if (location.y < -height / 2 || location.y > height / 2) {
+
+                this.alive = false;
+            }
     }
 }
