@@ -42,6 +42,29 @@ class Player {
     }
     
     public void bounds() {
+        
+        //center point of player
+        float cx = (world[0].x + world[1].x + world[2].x) / 3;
+        float cy = (world[0].y + world[1].y + world[2].y) / 3;
     
+        if (cx < -width / 2) {
+            
+            location.x = width / 2;
+        }
+        
+        if (cx > width / 2) {
+            
+            location.x  = -width / 2;
+        }
+        
+        if (cy < -height / 2) {
+            
+            location.y = height / 2;
+        }
+        
+        if (cy > height / 2) {
+            
+            location.y = -height / 2;
+        }
     }
 }

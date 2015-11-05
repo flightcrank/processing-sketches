@@ -1,6 +1,5 @@
 
 Player ship = new Player();
-Bullet b = new Bullet();
 Bullet[] bullets = new Bullet[6];
 
 void setup() {
@@ -63,6 +62,7 @@ void draw() {
     }
     
     ship.update();
+    ship.bounds();
     
     for (int i = 0; i < bullets.length; i++) {
         
@@ -79,23 +79,26 @@ void keyPressed() {
             
             if (bullets[i].alive == false) {
                 
-                println("i = "+ i );
                 bullets[i].location.x = ship.world[0].x;
                 bullets[i].location.y = -ship.world[0].y;
+                
                 Vector bullet_velocity = new Vector(ship.verts[0].x, ship.verts[0].y);
                 bullet_velocity.normalise();
                 bullet_velocity.multi(4);
+                
                 bullets[i].velocity.x = bullet_velocity.x;
                 bullets[i].velocity.y = -bullet_velocity.y;
                 bullets[i].alive = true;
                 break;
             }
         }
- 
     }
 }
 
 void mouseClicked() {       
+    
+    println("loc.x = " + ship.location.x + " loc.y = " + ship.location.y);
+    println("vel.x = " + ship.velocity.x + " vel.y = " + ship.velocity.y);
+    println();
 
-    println(ship.location.y);
 }
