@@ -1,6 +1,7 @@
-
+ 
 Player ship = new Player();
 Bullet[] bullets = new Bullet[6];
+Asteroid rocks = new Asteroid();
 
 void setup() {
     
@@ -63,6 +64,8 @@ void draw() {
     
     ship.update();
     ship.bounds();
+    rocks.update();
+    rocks.bounds();
     
     for (int i = 0; i < bullets.length; i++) {
         

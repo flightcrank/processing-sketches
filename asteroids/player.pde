@@ -19,7 +19,7 @@ class Player {
     
     void update() {
 
-        velocity.limit(2);
+        velocity.limit(2.5);
         location.add(velocity);
         
         for(int i = 0; i <  world.length; i++) {
