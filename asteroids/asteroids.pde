@@ -1,7 +1,7 @@
  
 Player ship = new Player();
-Bullet[] bullets = new Bullet[6];
-Asteroid rocks = new Asteroid();
+Bullet[] bullets = new Bullet[1];
+Asteroid rocks[] = new Asteroid[1];
 
 void setup() {
     
@@ -10,6 +10,11 @@ void setup() {
     for (int i = 0; i < bullets.length; i++) {
         
         bullets[i] = new Bullet();
+    }
+    
+    for (int i = 0; i < rocks.length; i++) {
+        
+        rocks[i] = new Asteroid();
     }
 }
 
@@ -61,17 +66,23 @@ void draw() {
             }
         }
     }
-    
-    ship.update();
-    ship.bounds();
-    rocks.update();
-    rocks.bounds();
+
+    for (int i = 0; i < rocks.length; i++) {
+        
+        rocks[i].update();
+        rocks[i].bounds();
+        rocks[i].collision(ship);
+        
+    }
     
     for (int i = 0; i < bullets.length; i++) {
         
         bullets[i].update();
         bullets[i].bounds();
     }
+    
+    ship.update();
+    ship.bounds();
 }
 
 void keyPressed() {
@@ -99,9 +110,6 @@ void keyPressed() {
 }
 
 void mouseClicked() {       
-    
-    println("loc.x = " + ship.location.x + " loc.y = " + ship.location.y);
-    println("vel.x = " + ship.velocity.x + " vel.y = " + ship.velocity.y);
+    rocks[0].collision(bullets);
     println();
-
 }

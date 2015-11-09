@@ -5,6 +5,9 @@ class Player {
     Vector[] world = new Vector[3];
     Vector location = new Vector(0,0);
     Vector velocity = new Vector(0,0);
+    float cx = 0;
+    float cy = 0;
+    float radius = 15;
 
     public Player() {
     
@@ -28,6 +31,15 @@ class Player {
             world[i] = verts[0].addv(verts[i], location);
         }
         
+        //center point of player
+        cx = (world[0].x + world[1].x + world[2].x) / 3;
+        cy = (world[0].y + world[1].y + world[2].y) / 3;
+        
+        ellipse(cx, -cy, 2,2);
+        noFill();
+        ellipseMode(RADIUS);
+//        ellipse(cx, -cy, radius, radius );
+//        fill(128);
         line(world[0].x, -world[0].y, world[1].x, -world[1].y);
         line(world[1].x, -world[1].y, world[2].x, -world[2].y);
         line(world[2].x, -world[2].y, world[0].x, -world[0].y);
@@ -43,10 +55,6 @@ class Player {
     
     public void bounds() {
         
-        //center point of player
-        float cx = (world[0].x + world[1].x + world[2].x) / 3;
-        float cy = (world[0].y + world[1].y + world[2].y) / 3;
-    
         if (cx < -width / 2) {
             
             location.x = width / 2;
@@ -67,4 +75,6 @@ class Player {
             location.y = -height / 2;
         }
     }
+    
+
 }

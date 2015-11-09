@@ -18,20 +18,24 @@ class Bullet {
         //draw bullet
         if (this.alive == true) {
         
-            ellipse(location.x, location.y, 5,5);
+            ellipse(location.x, location.y, 2.5, 2.5);
         }
     }
         
     public void bounds() {
     
-            if (location.x < -width / 2 || location.x > width / 2) {
+        if (location.x < -width / 2 || location.x > width / 2) {
 
-                this.alive = false;
-            }
+            this.alive = false;
+        }
             
-            if (location.y < -height / 2 || location.y > height / 2) {
+        if (location.y < -height / 2 || location.y > height / 2) {
 
-                this.alive = false;
+        this.alive = false;
             }
+    }
+    
+    public void collision(Bullet blt) {
+    
     }
 }

@@ -5,6 +5,9 @@ class Asteroid {
     Vector[] world = new Vector[10];
     Vector location = new Vector(0,0);
     Vector velocity = new Vector(0,0);
+    float cx = 0;
+    float cy = 0;
+    float radius = 30;
 
     public Asteroid() {
     
@@ -18,14 +21,14 @@ class Asteroid {
         verts[7] = new Vector(-.02, -.02);
         verts[8] = new Vector(-.04, .00);
         verts[9] = new Vector(-.03, .03);
-
         
         location.x = random(-320, 320);
         location.y = random(-320, 320);
         
-        velocity.x = random(-1.5, 1.5);
-        velocity.y = random(-1.5, 1.5);
+        velocity.x = random(-.0, .0);
+        velocity.y = random(-.0 , .0);
         
+        //scale the object in object space to make larger on screen
         for(int i = 0; i < verts.length; i ++) {
             
             verts[i].multi(888);
@@ -37,7 +40,21 @@ class Asteroid {
 
         velocity.limit(2.5);
         location.add(velocity);
+        
+        cx = 0;
+        cy = 0;
+        
+        //calculate center point of asteroid
+        for (int i = 0; i < world.length; i++) {
+            
+            cx += world[i].x;
+            cy += world[i].y;
+        }
+        
+        cx /= world.length;
+        cy /= world.length;
 
+    
         for(int i = 0; i < world.length; i++) {
                     
             //translates point location into world space
@@ -47,6 +64,10 @@ class Asteroid {
             verts[i].rotate(.5);
         }
         
+        ellipse(cx, -cy, 2,2);
+//        noFill();
+//        ellipse(cx, -cy, radius, radius);
+//        fill(128);
         line(world[0].x, -world[0].y, world[1].x, -world[1].y);
         line(world[1].x, -world[1].y, world[2].x, -world[2].y);        
         line(world[2].x, -world[2].y, world[3].x, -world[3].y);
@@ -69,20 +90,7 @@ class Asteroid {
     }
     
     public void bounds() {
-        
-        //center point of asteroid
-        float cx = 0;
-        float cy = 0;
-        
-        for (int i = 0 ; i < world.length; i++) {
-            
-            cx += world[i].x;
-            cy += world[i].y;
-        }
-        
-        cx /= world.length;
-        cy /= world.length;
-        
+
         if (cx < -width / 2) {
             
             location.x = width / 2;
@@ -103,5 +111,34 @@ class Asteroid {
             location.y = -height / 2;
         }
     }
-
+    
+    public void collision(Player ship) {
+        
+        float sum = this.radius + ship.radius;
+        
+        float a = pow(this.cx - ship.cx, 2); 
+        float b = pow(this.cy - ship.cy, 2);
+        float distance = sqrt(a + b);
+        
+        if (distance < sum) {
+            
+            println("ship collision detected");
+        }
+    }
+    
+    public void collision(Bullet[] blt) {
+        
+        for (int i = 0; i < blt.length; i++) {
+        
+            float a = pow(this.cx - blt[i].location.x, 2); 
+            float b = pow(this.cy - -blt[i].location.y, 2);
+            float distance = sqrt(a + b);
+            println("distance " + distance);
+            if (distance < this.radius) {
+            
+                println("bullet collision detected");
+                blt.alive = false;
+            }
+        }
+    }
 }
